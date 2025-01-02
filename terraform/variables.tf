@@ -5,8 +5,8 @@ variable "aws_region" {
 
 variable "lambda_zip_path" {
   description = "Path to the Lambda ZIP file in S3"
-  #default     = "s3://bucket-idpd-toinho/target/lambda.zip"
-  default = "/home/antonio/projetos/lambda.zip"
+  default     = "s3://bucket-idpd-toinho/target/lambda.zip"
+  #default = "/home/antonio/projetos/lambda.zip"
 }
 
 
