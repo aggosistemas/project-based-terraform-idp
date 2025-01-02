@@ -1,8 +1,12 @@
-name: Provisionammento Lambda and API Gateway
+name: Provision Lambda and API Gateway
 
 on:
   workflow_dispatch:
     inputs:
+      branch:
+        description: "Specify the branch to execute the pipeline"
+        required: true
+        default: "master"
       action:
         description: "Choose action: apply or destroy"
         required: true
@@ -16,11 +20,11 @@ jobs:
   provision:
     runs-on: ubuntu-latest
 
-    if: github.ref == 'refs/heads/master' # Garante execução apenas na branch master
-
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
+      with:
+        ref: ${{ github.event.inputs.branch }} # Permite escolher a branch
 
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v3
