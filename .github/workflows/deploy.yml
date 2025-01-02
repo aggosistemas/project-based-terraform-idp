@@ -1,0 +1,67 @@
+name: Provisionammento Lambda and API Gateway
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "Choose action: apply or destroy"
+        required: true
+        default: "apply"
+        type: choice
+        options:
+          - apply
+          - destroy
+
+jobs:
+  provision:
+    runs-on: ubuntu-latest
+
+    if: github.ref == 'refs/heads/master' # Garante execução apenas na branch master
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v3
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ca-central-1
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: 1.5.5
+
+    - name: Initialize Terraform
+      working-directory: terraform
+      run: terraform init -reconfigure
+
+    - name: Validate Terraform
+      working-directory: terraform
+      run: terraform validate
+
+    - name: Plan Terraform
+      working-directory: terraform
+      run: |
+        if [[ "${{ github.event.inputs.action }}" == "apply" ]]; then
+          terraform plan -out=tfplan \
+            -var="lambda_zip_path=s3://bucket-idpd-toinho/target/lambda.zip" \
+            -var="project_name=my-project" \
+            -var="lambda_name=first-my-lambda"
+        elif [[ "${{ github.event.inputs.action }}" == "destroy" ]]; then
+          terraform plan -destroy -out=tfplan \
+            -var="lambda_zip_path=s3://bucket-idpd-toinho/target/lambda.zip" \
+            -var="project_name=my-project" \
+            -var="lambda_name=first-my-lambda"
+        fi
+
+    - name: Apply or Destroy Terraform
+      working-directory: terraform
+      run: |
+        if [[ "${{ github.event.inputs.action }}" == "apply" ]]; then
+          terraform apply -auto-approve tfplan
+        elif [[ "${{ github.event.inputs.action }}" == "destroy" ]]; then
+          terraform apply -auto-approve tfplan
+        fi
