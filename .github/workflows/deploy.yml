@@ -1,10 +1,10 @@
-name: Provision Lambda and API Gateway
+name: Provisionamento da Lambda e do API Gateway
 
 on:
   workflow_dispatch:
     inputs:
       branch:
-        description: "Specify the branch to execute the pipeline"
+        description: "Selecione a branch para executar a pipeline"
         required: true
         default: "master"
       action:
